@@ -177,7 +177,7 @@ For ${language}, please use an appropriate compiler/interpreter.`);
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  Code Analyzer Pro
+                  ASKIT-ASK.LEARN.REPEAT
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   AI-powered code debugging and generation
