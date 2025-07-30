@@ -66,7 +66,20 @@ Important guidelines:
       });
 
       if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        let errorMessage = `API Error (${response.status})`;
+        
+        if (response.status === 503) {
+          errorMessage = "Gemini API is currently overloaded. Please try again in a few moments.";
+        } else if (response.status === 401) {
+          errorMessage = "Invalid API key. Please check your Gemini API key.";
+        } else if (response.status === 429) {
+          errorMessage = "Rate limit exceeded. Please wait before trying again.";
+        } else if (errorData?.error?.message) {
+          errorMessage = errorData.error.message;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -81,7 +94,7 @@ Important guidelines:
       return JSON.parse(jsonMatch[0]);
     } catch (error) {
       console.error('Error analyzing code:', error);
-      throw new Error('Failed to analyze code. Please check your API key and try again.');
+      throw error instanceof Error ? error : new Error('Failed to analyze code. Please try again.');
     }
   }
 
@@ -124,7 +137,20 @@ Generate ${language} code:
       });
 
       if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        let errorMessage = `API Error (${response.status})`;
+        
+        if (response.status === 503) {
+          errorMessage = "Gemini API is currently overloaded. Please try again in a few moments.";
+        } else if (response.status === 401) {
+          errorMessage = "Invalid API key. Please check your Gemini API key.";
+        } else if (response.status === 429) {
+          errorMessage = "Rate limit exceeded. Please wait before trying again.";
+        } else if (errorData?.error?.message) {
+          errorMessage = errorData.error.message;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -136,7 +162,7 @@ Generate ${language} code:
       return result;
     } catch (error) {
       console.error('Error generating code:', error);
-      throw new Error('Failed to generate code. Please check your API key and try again.');
+      throw error instanceof Error ? error : new Error('Failed to generate code. Please try again.');
     }
   }
 }
