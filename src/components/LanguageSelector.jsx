@@ -1,13 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Code2, FileText } from "lucide-react";
-import { Language } from "./CodeEditor";
 
-interface LanguageSelectorProps {
-  value: Language;
-  onChange: (language: Language) => void;
-}
-
-const languages: { value: Language; label: string; icon: string }[] = [
+const languages = [
   { value: 'python', label: 'Python', icon: '🐍' },
   { value: 'javascript', label: 'JavaScript', icon: '📜' },
   { value: 'java', label: 'Java', icon: '☕' },
@@ -17,7 +11,7 @@ const languages: { value: Language; label: string; icon: string }[] = [
   { value: 'css', label: 'CSS', icon: '🎨' },
 ];
 
-export const LanguageSelector = ({ value, onChange }: LanguageSelectorProps) => {
+export const LanguageSelector = ({ value, onChange }) => {
   return (
     <div className="flex items-center space-x-2">
       <Code2 className="h-4 w-4 text-muted-foreground" />

@@ -8,17 +8,9 @@ import { html } from '@codemirror/lang-html';
 import { css } from '@codemirror/lang-css';
 import { oneDark } from '@codemirror/theme-one-dark';
 
-export type Language = 'python' | 'javascript' | 'cpp' | 'java' | 'html' | 'css' | 'c';
+export const languages = ['python', 'javascript', 'cpp', 'java', 'html', 'css', 'c'];
 
-interface CodeEditorProps {
-  value: string;
-  onChange: (value: string) => void;
-  language: Language;
-  placeholder?: string;
-  height?: string;
-}
-
-const getLanguageExtension = (language: Language) => {
+const getLanguageExtension = (language) => {
   switch (language) {
     case 'python':
       return python();
@@ -44,8 +36,8 @@ export const CodeEditor = ({
   language, 
   placeholder = "Enter your code here...",
   height = "400px"
-}: CodeEditorProps) => {
-  const handleChange = useCallback((val: string) => {
+}) => {
+  const handleChange = useCallback((val) => {
     onChange(val);
   }, [onChange]);
 

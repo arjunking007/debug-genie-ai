@@ -1,27 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { CodeEditor, Language } from "@/components/CodeEditor";
+import { CodeEditor } from "@/components/CodeEditor";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { AnalysisPanel, ErrorAnalysis } from "@/components/AnalysisPanel";
+import { AnalysisPanel } from "@/components/AnalysisPanel";
 import { CodeGenerationPanel } from "@/components/CodeGenerationPanel";
 import { GeminiService } from "@/services/geminiService";
 import { useToast } from "@/hooks/use-toast";
-import { Bug, Sparkles, Settings, Key } from "lucide-react";
+import { Bug, Sparkles, Settings, Key, Play } from "lucide-react";
 
 const Index = () => {
   const [code, setCode] = useState("");
-  const [language, setLanguage] = useState<Language>('python');
-  const [analysis, setAnalysis] = useState<ErrorAnalysis | null>(null);
+  const [language, setLanguage] = useState('python');
+  const [analysis, setAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [apiKey, setApiKey] = useState("");
-  const [geminiService, setGeminiService] = useState<GeminiService | null>(null);
+  const [geminiService, setGeminiService] = useState(null);
+  const [output, setOutput] = useState("");
+  const [isRunning, setIsRunning] = useState(false);
   const { toast } = useToast();
+
+  // Load API key from localStorage on component mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('gemini_api_key');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+      setGeminiService(new GeminiService(savedApiKey));
+    }
+  }, []);
 
   const handleApiKeySubmit = () => {
     if (!apiKey.trim()) {
@@ -33,6 +44,8 @@ const Index = () => {
       return;
     }
     
+    // Save API key to localStorage
+    localStorage.setItem('gemini_api_key', apiKey);
     setGeminiService(new GeminiService(apiKey));
     toast({
       title: "Success",
@@ -80,7 +93,7 @@ const Index = () => {
     }
   };
 
-  const generateCode = async (prompt: string, targetLanguage: Language) => {
+  const generateCode = async (prompt, targetLanguage) => {
     if (!geminiService) {
       toast({
         title: "Error", 
@@ -106,6 +119,49 @@ const Index = () => {
       });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const runCode = () => {
+    if (!code.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter some code to run",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsRunning(true);
+    setOutput("");
+
+    try {
+      if (language === 'javascript') {
+        // Capture console.log output
+        const originalLog = console.log;
+        let capturedOutput = [];
+        
+        console.log = (...args) => {
+          capturedOutput.push(args.map(arg => 
+            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+          ).join(' '));
+        };
+
+        // Execute the code
+        eval(code);
+        
+        // Restore original console.log
+        console.log = originalLog;
+        
+        setOutput(capturedOutput.join('\n') || 'Code executed successfully (no output)');
+      } else {
+        setOutput(`Code execution is currently only supported for JavaScript. 
+For ${language}, please use an appropriate compiler/interpreter.`);
+      }
+    } catch (error) {
+      setOutput(`Error: ${error.message}`);
+    } finally {
+      setIsRunning(false);
     }
   };
 
@@ -206,24 +262,66 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                <Button 
-                  onClick={analyzeCode}
-                  disabled={isAnalyzing || !geminiService}
-                  className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
-                  size="lg"
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Bug className="h-4 w-4 mr-2" />
-                      Analyze Code
-                    </>
-                  )}
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    onClick={analyzeCode}
+                    disabled={isAnalyzing || !geminiService}
+                    className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                    size="lg"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Bug className="h-4 w-4 mr-2" />
+                        Analyze Code
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button 
+                    onClick={runCode}
+                    disabled={isRunning}
+                    variant="outline"
+                    size="lg"
+                  >
+                    {isRunning ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                        Running...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4 mr-2" />
+                        Run Code
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Output Panel */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Play className="h-5 w-5 text-accent" />
+                      <span>Output</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-muted rounded-lg p-4 min-h-[100px] max-h-[200px] overflow-y-auto font-mono text-sm">
+                      {output ? (
+                        <pre className="whitespace-pre-wrap">{output}</pre>
+                      ) : (
+                        <div className="text-muted-foreground italic">
+                          Click "Run Code" to see output here...
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Analysis Results Panel */}

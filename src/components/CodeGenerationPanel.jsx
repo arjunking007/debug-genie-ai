@@ -3,24 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Copy, Download } from "lucide-react";
-import { Language } from "./CodeEditor";
 import { LanguageSelector } from "./LanguageSelector";
 import { CodeEditor } from "./CodeEditor";
 import { useToast } from "@/hooks/use-toast";
-
-interface CodeGenerationPanelProps {
-  onGenerate: (prompt: string, language: Language) => Promise<void>;
-  generatedCode: string;
-  isGenerating: boolean;
-}
 
 export const CodeGenerationPanel = ({ 
   onGenerate, 
   generatedCode, 
   isGenerating 
-}: CodeGenerationPanelProps) => {
+}) => {
   const [prompt, setPrompt] = useState("");
-  const [language, setLanguage] = useState<Language>('python');
+  const [language, setLanguage] = useState('python');
   const { toast } = useToast();
 
   const handleGenerate = async () => {
@@ -53,7 +46,7 @@ export const CodeGenerationPanel = ({
   };
 
   const downloadCode = () => {
-    const extensions: Record<Language, string> = {
+    const extensions = {
       python: 'py',
       javascript: 'js',
       java: 'java',

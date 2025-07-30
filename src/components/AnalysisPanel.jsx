@@ -3,26 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-export interface ErrorAnalysis {
-  hasErrors: boolean;
-  errors: Array<{
-    line: number;
-    column?: number;
-    type: 'error' | 'warning' | 'info';
-    message: string;
-    suggestion: string;
-    impact: string;
-  }>;
-  summary: string;
-  suggestions: string[];
-}
+// ErrorAnalysis shape:
+// {
+//   hasErrors: boolean,
+//   errors: Array with line, column, type, message, suggestion, impact
+//   summary: string,
+//   suggestions: string[]
+// }
 
-interface AnalysisPanelProps {
-  analysis: ErrorAnalysis | null;
-  isLoading: boolean;
-}
-
-export const AnalysisPanel = ({ analysis, isLoading }: AnalysisPanelProps) => {
+export const AnalysisPanel = ({ analysis, isLoading }) => {
   if (isLoading) {
     return (
       <Card className="h-full">
@@ -59,7 +48,7 @@ export const AnalysisPanel = ({ analysis, isLoading }: AnalysisPanelProps) => {
     );
   }
 
-  const getErrorIcon = (type: string) => {
+  const getErrorIcon = (type) => {
     switch (type) {
       case 'error':
         return <AlertCircle className="h-4 w-4 text-destructive" />;
@@ -70,7 +59,7 @@ export const AnalysisPanel = ({ analysis, isLoading }: AnalysisPanelProps) => {
     }
   };
 
-  const getErrorBadgeVariant = (type: string) => {
+  const getErrorBadgeVariant = (type) => {
     switch (type) {
       case 'error':
         return 'destructive';
